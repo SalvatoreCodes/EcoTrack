@@ -1,4 +1,4 @@
-# EcoTrack backend — portable container (Koyeb / any Docker host).
+# EcoTrack backend — portable container (Hugging Face Spaces / any Docker host).
 # Build context = this server/ directory.
 FROM node:20-alpine
 
@@ -12,7 +12,9 @@ RUN npm install --omit=dev
 COPY . .
 
 ENV NODE_ENV=production
-# Host injects PORT (Koyeb -> 8000). Server reads process.env.PORT.
-EXPOSE 8000
+# HF Spaces proxies to app_port 7860 (see README front-matter).
+# Server reads process.env.PORT; default it to 7860 here.
+ENV PORT=7860
+EXPOSE 7860
 
 CMD ["node", "index.mjs"]
