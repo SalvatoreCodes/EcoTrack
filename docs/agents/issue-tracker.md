@@ -2,7 +2,7 @@
 
 Issues and PRDs for this repo live as GitHub issues. Use the `gh` CLI for all operations.
 
-> **Setup note:** EcoTrack has no git remote yet. `gh issue` commands fail until you add one and create the repo — e.g. `gh repo create <owner>/EcoTrack --source=. --private --push` (or `git remote add origin https://github.com/<owner>/EcoTrack.git`). Until then, track work locally or wire the remote first.
+> **Remote:** `SalvatoreCodes/EcoTrack` (private). `gh issue` commands work from any clone.
 
 ## Conventions
 

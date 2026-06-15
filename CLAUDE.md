@@ -4,7 +4,7 @@
 
 ### Issue tracker
 
-GitHub Issues via the `gh` CLI (remote not configured yet — see doc). See `docs/agents/issue-tracker.md`.
+GitHub Issues (`SalvatoreCodes/EcoTrack`, private) via the `gh` CLI. See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
