@@ -1,0 +1,80 @@
+/* EcoTrack design tokens
+ * Derived from open-design `clean` design-system schema (tokens.css contract).
+ * Earthy-green, map-first. Adds emission/AQI heat ramps.
+ */
+:root {
+  /* surfaces */
+  --bg: #ffffff;
+  --surface: #f4f7f5;
+  --surface-warm: #e8f0ea;
+  --surface-map: #e9eef0;        /* faux map canvas */
+  --fg: #0f1f17;                 /* deep forest near-black */
+  --fg-2: #2f4339;
+  --muted: #6b7d73;
+  --border: #d8e2db;
+  --border-soft: #eaf0ec;
+
+  /* brand */
+  --accent: #1b7f4b;             /* forest green (primary CTA) */
+  --accent-on: #ffffff;
+  --accent-hover: #166b40;
+  --accent-active: #125736;
+  --eco: #2ecc71;                /* bright eco green */
+  --eco-soft: #d6f5e3;
+
+  /* status */
+  --success: #168a46;
+  --warn: #f5a623;               /* amber */
+  --danger: #e5484d;
+
+  /* emission / AQI heat ramp (low -> high) */
+  --heat-1: #2ecc71;             /* clean / low */
+  --heat-2: #a3d911;             /* moderate-low */
+  --heat-3: #f5c518;             /* moderate */
+  --heat-4: #f5a623;             /* high */
+  --heat-5: #e5484d;             /* very high */
+
+  /* type */
+  --font-display: "Spline Sans", Inter, system-ui, sans-serif;
+  --font-body: Inter, system-ui, sans-serif;
+  --font-mono: "SF Mono", ui-monospace, Menlo, monospace;
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 22px;
+  --text-2xl: 28px;
+  --text-3xl: 34px;
+  --leading-body: 1.5;
+  --leading-tight: 1.1;
+  --tracking-display: -0.02em;
+
+  /* spacing — 8pt grid */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  /* radius */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-pill: 9999px;
+
+  /* elevation */
+  --elev-ring: 0 0 0 1px var(--border);
+  --elev-card: 0 6px 20px rgba(15, 31, 23, 0.08);
+  --elev-sheet: 0 -8px 32px rgba(15, 31, 23, 0.12);
+  --elev-fab: 0 8px 24px rgba(27, 127, 75, 0.32);
+  --focus-ring: 0 0 0 3px rgba(27, 127, 75, 0.22);
+
+  /* motion */
+  --motion-fast: 150ms;
+  --motion-base: 240ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+}

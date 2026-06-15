@@ -1,0 +1,35 @@
+{
+  "cli": {
+    "version": ">= 12.0.0",
+    "appVersionSource": "local"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_SERVER_URL": "https://REPLACE_WITH_RENDER_URL.onrender.com",
+        "EXPO_PUBLIC_APP_KEY": "f2d319c1a6cb30677bb612cf4f85ebf5d37783c6906c0f4b"
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_PUBLIC_SERVER_URL": "https://REPLACE_WITH_RENDER_URL.onrender.com",
+        "EXPO_PUBLIC_APP_KEY": "f2d319c1a6cb30677bb612cf4f85ebf5d37783c6906c0f4b"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
