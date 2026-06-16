@@ -4,14 +4,12 @@ import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { health, type Health } from '@/lib/api';
-import { SERVER_URL } from '@/lib/config';
 import { Color, Font, Radius, Space } from '@/theme';
 
 const PROVIDERS: { key: keyof Health['keys']; label: string }[] = [
   { key: 'ors', label: 'OpenRouteService · routing' },
   { key: 'waqi', label: 'WAQI · air quality' },
   { key: 'tomtom', label: 'TomTom · live traffic' },
-  { key: 'anthropic', label: 'Claude · assistant' },
 ];
 
 export default function Settings() {
@@ -30,34 +28,28 @@ export default function Settings() {
   };
   useEffect(refresh, []);
 
-  const online = !!h?.ok;
-
   return (
     <View style={[styles.fill, { paddingTop: insets.top }]}>
       <View style={styles.header}>
         <Text style={styles.title}>Settings</Text>
       </View>
       <ScrollView contentContainerStyle={{ paddingHorizontal: Space.lg, paddingBottom: Space.huge }}>
-        <Text style={styles.group}>SERVER</Text>
+        <Text style={styles.group}>APP</Text>
         <View style={styles.card}>
           <View style={[styles.row, styles.divider]}>
-            <Text style={styles.rowLabel}>Connection</Text>
+            <Text style={styles.rowLabel}>Mode</Text>
             <View style={styles.statusWrap}>
-              <View style={[styles.dot, { backgroundColor: loading ? Color.warn : online ? Color.success : Color.danger }]} />
-              <Text style={styles.muted}>{loading ? 'Checking…' : online ? 'Online' : 'Offline'}</Text>
+              <View style={[styles.dot, { backgroundColor: Color.success }]} />
+              <Text style={styles.muted}>On-device</Text>
             </View>
           </View>
-          <View style={[styles.row, styles.divider]}>
-            <Text style={styles.rowLabel}>URL</Text>
-            <Text style={styles.mono} numberOfLines={1}>{SERVER_URL}</Text>
-          </View>
           <View style={styles.row}>
-            <Text style={styles.rowLabel}>Model</Text>
-            <Text style={styles.muted}>{h?.model ?? '—'}</Text>
+            <Text style={styles.rowLabel}>Assistant</Text>
+            <Text style={styles.muted}>{loading ? 'Checking…' : (h?.model ?? '—')}</Text>
           </View>
         </View>
 
-        <Text style={styles.group}>DATA PROVIDERS · configured on server</Text>
+        <Text style={styles.group}>DATA PROVIDERS · bundled in app</Text>
         <View style={styles.card}>
           {PROVIDERS.map((p, i) => {
             const ok = !!h?.keys?.[p.key];
@@ -85,7 +77,7 @@ export default function Settings() {
         <View style={styles.aboutRow}>
           <Feather name="info" size={14} color={Color.muted} />
           <Text style={styles.note}>
-            API keys live on the EcoTrack server, never on your device. Providers showing “Sample” run on built-in demo data until a key is added server-side.
+            EcoTrack runs on your device. Routing and air-quality data come straight from their providers; the assistant runs locally. Providers showing “Sample” fall back to built-in demo data until a key is bundled.
           </Text>
         </View>
         <Text style={styles.version}>EcoTrack v0.1 · Jabodetabek</Text>
@@ -104,7 +96,6 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: Space.lg, gap: Space.md },
   rowLabel: { fontSize: Font.size.sm, fontWeight: Font.weight.medium, color: Color.fg, flexShrink: 1 },
   muted: { fontSize: Font.size.sm, color: Color.muted },
-  mono: { fontSize: Font.size.xs, color: Color.fg2, fontFamily: undefined, flexShrink: 1, textAlign: 'right' },
   statusWrap: { flexDirection: 'row', alignItems: 'center', gap: Space.sm },
   dot: { width: 9, height: 9, borderRadius: 5 },
   status: { fontSize: 10, fontWeight: Font.weight.bold, paddingHorizontal: 7, paddingVertical: 2, borderRadius: Radius.pill, overflow: 'hidden' },

@@ -41,7 +41,7 @@ export default function Assistant() {
     chat(next, { routes, selectedId: selectedRouteId, destName: dest?.name })
       .then((r) => setMessages([...next, { role: 'ai', text: r.reply }]))
       .catch(() =>
-        setMessages([...next, { role: 'ai', text: 'I couldn’t reach the assistant. Check the server connection in Settings.' }]),
+        setMessages([...next, { role: 'ai', text: 'Sorry, I couldn’t answer that one — try rephrasing.' }]),
       )
       .finally(() => {
         setTyping(false);
@@ -54,7 +54,7 @@ export default function Assistant() {
       <View style={styles.header}>
         <View>
           <Text style={styles.title}>Assistant</Text>
-          <Text style={styles.subtitle}>Powered by Claude</Text>
+          <Text style={styles.subtitle}>On-device assistant</Text>
         </View>
       </View>
 

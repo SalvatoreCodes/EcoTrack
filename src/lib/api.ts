@@ -1,7 +1,11 @@
-import { APP_KEY, SERVER_URL } from './config';
+/**
+ * App data layer — now fully on-device (no server). Keeps the same function shapes the
+ * screens already call, so nothing else had to change.
+ */
+import { ORS_KEY, TOMTOM_KEY, WAQI_TOKEN } from './config';
+import { localReply } from './explain';
+import { computeRoutes, fetchAir } from './providers';
 import type { HeatPoint, Mode, Place, RouteOption } from './types';
-
-const appKeyHeader: Record<string, string> = APP_KEY ? { 'x-app-key': APP_KEY } : {};
 
 export interface ChatMsg {
   role: 'ai' | 'me';
@@ -13,42 +17,31 @@ export interface ChatContext {
   destName?: string;
 }
 
-async function post<T>(path: string, body: unknown): Promise<T> {
-  const r = await fetch(SERVER_URL + path, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', ...appKeyHeader },
-    body: JSON.stringify(body),
-  });
-  if (!r.ok) throw new Error(`${path} ${r.status}`);
-  return r.json() as Promise<T>;
-}
-
 export async function getRoutes(origin: Place, dest: Place, mode: Mode): Promise<RouteOption[]> {
-  const j = await post<{ routes: RouteOption[] }>('/api/routes', { origin, dest, mode });
-  return j.routes;
+  return computeRoutes(origin.coord, dest.coord, mode);
 }
 
 export async function getAir(): Promise<{ points: HeatPoint[]; source: 'live' | 'sample' }> {
-  const r = await fetch(SERVER_URL + '/api/air', { headers: appKeyHeader });
-  if (!r.ok) throw new Error(`/api/air ${r.status}`);
-  return (await r.json()) as { points: HeatPoint[]; source: 'live' | 'sample' };
+  return fetchAir();
 }
 
+/** On-device assistant: local explainer (no Anthropic key bundled). */
 export async function chat(messages: ChatMsg[], context: ChatContext): Promise<{ reply: string; source: string }> {
-  return post('/api/chat', { messages, context });
+  const lastUser = [...messages].reverse().find((m) => m.role === 'me')?.text ?? '';
+  return { reply: localReply(lastUser, context.routes ?? []), source: 'local' };
 }
 
 export interface Health {
   ok: boolean;
-  keys: { ors: boolean; waqi: boolean; tomtom: boolean; anthropic: boolean };
+  keys: { ors: boolean; waqi: boolean; tomtom: boolean };
   model: string;
 }
 
+/** Local status — which bundled provider keys are present. */
 export async function health(): Promise<Health | null> {
-  try {
-    const r = await fetch(SERVER_URL + '/api/health', { headers: appKeyHeader, signal: AbortSignal.timeout(4000) });
-    return (await r.json()) as Health;
-  } catch {
-    return null;
-  }
+  return {
+    ok: true,
+    keys: { ors: !!ORS_KEY, waqi: !!WAQI_TOKEN, tomtom: !!TOMTOM_KEY },
+    model: 'on-device · local assistant',
+  };
 }
