@@ -11,6 +11,7 @@ export default function RootLayout() {
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#ffffff' } }}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="compare" options={{ animation: 'slide_from_bottom' }} />
+          <Stack.Screen name="pick" options={{ animation: 'slide_from_bottom' }} />
           <Stack.Screen name="navigate" options={{ animation: 'fade' }} />
         </Stack>
       </SafeAreaProvider>

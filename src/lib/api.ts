@@ -4,8 +4,10 @@
  */
 import { ORS_KEY, TOMTOM_KEY, WAQI_TOKEN } from './config';
 import { localReply } from './explain';
-import { computeRoutes, fetchAir } from './providers';
+import { computeRoutes, fetchAir, reverseGeocode, searchPlaces } from './providers';
 import type { HeatPoint, Mode, Place, RouteOption } from './types';
+
+export { reverseGeocode, searchPlaces };
 
 export interface ChatMsg {
   role: 'ai' | 'me';

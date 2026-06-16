@@ -7,8 +7,8 @@
 import { ORS_KEY, TOMTOM_KEY, WAQI_TOKEN } from './config';
 import { EMISSION_FACTORS, congestionMultiplier, emissionLevel } from './emissions';
 import { curve, haversineKm } from './geo';
-import { FALLBACK_HEAT } from './jakarta';
-import type { HeatPoint, Mode, RouteOption, Step } from './types';
+import { FALLBACK_HEAT, JAKARTA_CENTER, SAMPLE_PLACES } from './jakarta';
+import type { HeatPoint, Mode, Place, RouteOption, Step } from './types';
 
 type LngLat = [number, number];
 type Leg = { geometry: LngLat[]; distanceKm: number; durationMin: number; steps?: Step[] };
@@ -241,5 +241,54 @@ export async function fetchAir(): Promise<{ points: HeatPoint[]; source: 'live' 
     return { points: [...keptSeed, ...live], source: 'live' };
   } catch {
     return { points: FALLBACK_HEAT, source: 'sample' };
+  }
+}
+
+// ---- Geocoding (ORS / Pelias). Falls back to filtering the seed places. ----
+function localSearch(q: string): Place[] {
+  const s = q.toLowerCase();
+  return SAMPLE_PLACES.filter((p) => p.name.toLowerCase().includes(s) || (p.detail ?? '').toLowerCase().includes(s));
+}
+
+/** Forward geocode a free-text query, biased to Greater Jakarta / Indonesia. */
+export async function searchPlaces(query: string): Promise<Place[]> {
+  const q = query.trim();
+  if (!q) return [];
+  if (!ORS_KEY) return localSearch(q);
+  try {
+    const url =
+      `https://api.openrouteservice.org/geocode/search?api_key=${ORS_KEY}` +
+      `&text=${encodeURIComponent(q)}&boundary.country=ID` +
+      `&focus.point.lon=${JAKARTA_CENTER[0]}&focus.point.lat=${JAKARTA_CENTER[1]}&size=8`;
+    const r = await fetch(url);
+    if (!r.ok) return localSearch(q);
+    const j: any = await r.json();
+    const places: Place[] = (j.features ?? [])
+      .filter((f: any) => Array.isArray(f?.geometry?.coordinates))
+      .map((f: any, i: number): Place => ({
+        id: f.properties?.id ?? `geo-${i}`,
+        name: f.properties?.name ?? f.properties?.label ?? 'Unknown place',
+        detail: f.properties?.label,
+        coord: [Number(f.geometry.coordinates[0]), Number(f.geometry.coordinates[1])],
+      }));
+    return places.length ? places : localSearch(q);
+  } catch {
+    return localSearch(q);
+  }
+}
+
+/** Reverse geocode a coordinate to a readable name (for map-picked points). */
+export async function reverseGeocode(coord: LngLat): Promise<string> {
+  if (!ORS_KEY) return 'Dropped pin';
+  try {
+    const url =
+      `https://api.openrouteservice.org/geocode/reverse?api_key=${ORS_KEY}` +
+      `&point.lon=${coord[0]}&point.lat=${coord[1]}&size=1`;
+    const r = await fetch(url);
+    if (!r.ok) return 'Dropped pin';
+    const j: any = await r.json();
+    return j.features?.[0]?.properties?.name || j.features?.[0]?.properties?.label || 'Dropped pin';
+  } catch {
+    return 'Dropped pin';
   }
 }
