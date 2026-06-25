@@ -26,6 +26,15 @@ function toLine(r: RouteOption) {
   return { id: r.id, geometry: r.geometry, color: r.greenest ? Color.accent : Heat[r.level - 1] };
 }
 
+// JSON.stringify does NOT escape <, >, & or any non-ASCII chars (incl. the line/paragraph
+// separators U+2028/U+2029). `call()` interpolates these strings into JS that is eval'd inside
+// the WebView, so escape every HTML-sensitive and non-printable-ASCII char to \uXXXX — a value
+// can then never break out of the script context. Today only numeric coords and route constants
+// flow through; this hardens it in case a place name is ever passed.
+function safeJson(value: unknown): string {
+  return JSON.stringify(value).replace(/[^\x20-\x7e]|[<>&]/g, (c) => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0'));
+}
+
 export function EcoMap(props: EcoMapProps) {
   const { heat, routes, selectedId, origin, dest, fitToRoutes, userLocation, centerOnUser, follow, bearing, recenterNonce, onReady, onMapClick } = props;
   const ref = useRef<WebView>(null);
@@ -33,7 +42,7 @@ export function EcoMap(props: EcoMapProps) {
   const didCenter = useRef(false);
 
   const call = (fn: string, ...args: unknown[]) => {
-    const js = `window.__eco && window.__eco.${fn}(${args.map((a) => JSON.stringify(a)).join(',')}); true;`;
+    const js = `window.__eco && window.__eco.${fn}(${args.map((a) => safeJson(a)).join(',')}); true;`;
     ref.current?.injectJavaScript(js);
   };
 
