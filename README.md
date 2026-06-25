@@ -1,56 +1,122 @@
-# Welcome to your Expo app 👋
+# EcoTrack 🌱
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**Navigate by emissions, not just time.**
 
-## Get started
+EcoTrack is a climate-aware navigation app for Indonesia (Jakarta / Jabodetabek). Instead of only showing you the *fastest* way from A to B, it ranks routes by the **CO₂ they emit** — and overlays a live **air-quality heatmap** so you can see the air you're driving through. An on-device assistant explains *why* a route is greener and when biking or the bus is actually the smarter call.
 
-1. Install dependencies
+It runs **fully on-device** — no backend server.
 
-   ```bash
-   npm install
-   ```
+---
 
-2. Start the app
+## What it does
 
-   ```bash
-   npx expo start
-   ```
+- **Eco routes** — compares car / motorbike / bus / bike / walk for a trip and highlights the greenest option, with the CO₂ saved vs. the fastest route.
+- **Live air-quality heatmap** — real WAQI station readings blended over a modeled baseline, colored clean → polluted.
+- **Search & pick-on-map** — search a destination (geocoding) or drop a pin directly on the map.
+- **Turn-by-turn navigation** — heading-up follow camera, maneuver banner, live ETA / distance / CO₂.
+- **On-device assistant** — explains the emission trade-offs of each route locally (no cloud AI key required).
 
-In the output, you'll find options to open the app in a
+---
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Tech stack
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+| Layer | Choice |
+|---|---|
+| Framework | [Expo](https://expo.dev) SDK 54, React Native 0.81, React 19, TypeScript |
+| Navigation / routing (app) | `expo-router` (file-based) |
+| Map | [MapLibre GL JS](https://maplibre.org/) in a WebView (native) / iframe (web), CARTO basemap on OpenStreetMap |
+| Directions | [OpenRouteService](https://openrouteservice.org/) → keyless [OSRM](https://project-osrm.org/) fallback → synthetic fallback |
+| Air quality | [WAQI](https://aqicn.org/api/) live stations, blended with a modeled seed |
+| Traffic | [TomTom](https://developer.tomtom.com/) congestion (optional; degrades gracefully) |
+| Geolocation | `expo-location` |
+| State | [Zustand](https://github.com/pmndrs/zustand) |
+| Assistant | On-device explainer (no LLM key bundled) |
+| Build & distribution | [EAS Build](https://docs.expo.dev/build/introduction/) (Android APK) |
 
-## Get a fresh project
+---
 
-When you're ready, run:
+## How it works
 
-```bash
-npm run reset-project
+**Emission model.** Each route's footprint is estimated as:
+
+```
+gCO₂ = Σ (segment_km × mode_factor) × traffic_multiplier
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Mode factors (g CO₂ / km): **car 170 · motorbike 100 · bus 60 (per passenger) · bike 0 · walk 0.** Traffic congestion (from TomTom, when available) scales the driving figure; without a key it falls back to a moderate multiplier.
 
-### Other setup steps
+**Routing & data flow.** The app talks to the providers directly from the device (`src/lib/providers.ts`):
+- `computeRoutes` requests geometry from OpenRouteService, falls back to the keyless OSRM public router, then to a synthetic path if both are unreachable — so routes always render.
+- `fetchAir` pulls nearby WAQI stations and blends them over a modeled baseline (Indonesia has sparse station coverage), returning `live` or `sample` source.
+- `searchPlaces` / `reverseGeocode` handle destination search and map-pin naming.
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+**Map bridge.** `EcoMap` renders MapLibre inside a WebView (`mapHtml.ts`) and pushes routes / heatmap / markers across a small JS bridge; on web it uses an iframe loaded from a Blob URL.
 
-## Learn more
+**Screens.** Map home · Routes (search + pick-on-map) · Assistant · Settings, plus pushed Compare / Navigate / Pick screens.
 
-To learn more about developing your project with Expo, look at the following resources:
+---
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Install
 
-## Join the community
+### Option A — Download the APK (Android)
 
-Join our community of developers creating universal apps.
+> **Install link:** https://github.com/SalvatoreCodes/EcoTrack/releases
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+1. Open the link and download the latest `EcoTrack.apk`.
+2. On your phone, allow **Install unknown apps** for your browser / files app when prompted.
+3. Open the APK to install. Requires **Android 7.0+**.
+
+The app works out of the box on fallback data (keyless routing + modeled air). Live ORS / WAQI data requires API keys baked in at build time (see below).
+
+### Option B — Run from source
+
+Requirements: Node.js 18+, npm, and the [Expo Go](https://expo.dev/go) app (SDK 54) on your phone — or a full Android toolchain for a native build.
+
+```bash
+git clone https://github.com/SalvatoreCodes/EcoTrack.git
+cd EcoTrack
+npm install
+```
+
+(Optional) Add a `.env` for live data — the app runs without it:
+
+```env
+EXPO_PUBLIC_ORS_KEY=your_openrouteservice_key
+EXPO_PUBLIC_WAQI_TOKEN=your_waqi_token
+EXPO_PUBLIC_TOMTOM_KEY=your_tomtom_key
+```
+
+Start the dev server:
+
+```bash
+npx expo start
+```
+
+Scan the QR code with Expo Go, or press `w` to open the web build.
+
+### Build your own APK
+
+```bash
+npm install -g eas-cli
+eas login
+eas build -p android --profile preview
+```
+
+EAS returns a download link for the signed APK when the build finishes.
+
+---
+
+## Project layout
+
+```
+src/
+├── app/                # expo-router screens ((tabs) + compare/navigate/pick)
+├── components/         # EcoMap (WebView map) + map HTML bridge
+└── lib/                # providers, emissions model, geo, location, store, config
+```
+
+---
+
+## License
+
+Personal / educational project. Not affiliated with the mapping or data providers listed above.
