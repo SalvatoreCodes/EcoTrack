@@ -1,4 +1,8 @@
-# EcoTrack 🌱
+<p align="center">
+  <img src="assets/images/logo-lockup.png" alt="EcoTrack" width="380">
+</p>
+
+# EcoTrack
 
 **Navigate by emissions, not just time.**
 

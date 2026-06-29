@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1480" height="420" viewBox="0 0 1480 420">
+  <defs><linearGradient id="leaf" x1="22%" y1="2%" x2="84%" y2="100%">
+    <stop offset="0" stop-color="#46c86f"/><stop offset="0.55" stop-color="#27a95a"/><stop offset="1" stop-color="#16864a"/>
+  </linearGradient></defs>
+  <g transform="translate(30,30) scale(0.703125)">
+    <path d="M256 88 C 346 150 356 226 348 270 C 339 350 298 394 256 426 C 214 394 173 350 164 270 C 156 226 166 150 256 88 Z" fill="url(#leaf)"/>
+    <path d="M256 150 C 234 214 278 250 250 312 C 237 350 250 376 256 400" fill="none" stroke="#ffffff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="256" cy="412" r="15" fill="#f5a623"/></g>
+  <text x="430" y="290" font-family="Montserrat, Poppins, 'Segoe UI', Arial, sans-serif" font-size="200" font-weight="800" letter-spacing="-6">
+    <tspan fill="#1f6f4a">Eco</tspan><tspan fill="#27c265">Track</tspan>
+  </text>
+</svg>

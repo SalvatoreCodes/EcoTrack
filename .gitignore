@@ -47,3 +47,7 @@ example
 # vendored design tooling (local only, not part of the app)
 .claude/skills/impeccable/
 .codegraph/
+
+# build artifacts
+*.apk
+gradle-build*.log
