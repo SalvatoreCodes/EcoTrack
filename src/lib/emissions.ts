@@ -23,15 +23,6 @@ export const MODE_LABEL: Record<Mode, string> = {
   walk: 'Walk',
 };
 
-/** grams CO2 for a trip. trafficMult ~1.0 free-flow, up to ~1.6 heavy congestion. */
-export function tripGrams(distanceKm: number, mode: Mode, trafficMult = 1): number {
-  return distanceKm * EMISSION_FACTORS[mode] * trafficMult;
-}
-
-export function gramsToKg(g: number): number {
-  return g / 1000;
-}
-
 /** Heat level for a route badge, by absolute trip kg CO2 (lower = greener). */
 export function emissionLevel(kg: number): HeatLevel {
   if (kg <= 1.0) return 1;

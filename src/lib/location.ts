@@ -4,7 +4,7 @@ import type { Place } from './types';
 
 export type Coord = [number, number]; // [lng, lat]
 
-export async function requestAndGet(): Promise<{ coord: Coord; heading: number | null } | null> {
+async function requestAndGet(): Promise<{ coord: Coord; heading: number | null } | null> {
   try {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') return null;

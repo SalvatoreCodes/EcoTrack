@@ -92,10 +92,8 @@ async function assemble(drivingLegs: Leg[], bikeLeg: Leg | null, mode: Mode, tom
       fastest.leg.geometry, fastest.leg.distanceKm, fastest.leg.durationMin, fastest.mult,
       slow ? undefined : 'fastest', fastest.leg.steps));
   }
-  const greener = cands
-    .slice(1)
-    .filter((c) => c.kg < (fastest?.kg ?? Infinity) * 0.96)
-    .sort((a, b) => a.kg - b.kg)[0];
+  const eligible = cands.slice(1).filter((c) => c.kg < (fastest?.kg ?? Infinity) * 0.96);
+  const greener = eligible.length ? eligible.reduce((min, c) => (c.kg < min.kg ? c : min)) : undefined;
   if (greener) {
     opts.push(buildOption('eco', 'EcoRoute', mode, greener.leg.geometry, greener.leg.distanceKm,
       greener.leg.durationMin, greener.mult, 'lower-emission route', greener.leg.steps));

@@ -2,7 +2,6 @@ import type { Place, HeatPoint } from './types';
 
 /** Default map view: Greater Jakarta (Jabodetabek). */
 export const JAKARTA_CENTER: [number, number] = [106.8272, -6.2255]; // [lng, lat]
-export const JAKARTA_ZOOM = 11.2;
 
 /** Seed places for recents / quick demo. */
 export const SAMPLE_PLACES: Place[] = [
