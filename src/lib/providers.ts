@@ -231,9 +231,11 @@ export async function fetchAir(): Promise<{ points: HeatPoint[]; source: 'live' 
     const r = await fetch(`https://api.waqi.info/map/bounds/?latlng=-6.9,106.3,-5.8,107.2&token=${WAQI_TOKEN}`);
     const j: any = await r.json();
     if (j.status !== 'ok' || !Array.isArray(j.data)) return { points: FALLBACK_HEAT, source: 'sample' };
-    const live: HeatPoint[] = j.data
-      .map((s: any) => ({ coord: [Number(s.lon), Number(s.lat)] as LngLat, aqi: Number(s.aqi) }))
-      .filter((p: HeatPoint) => Number.isFinite(p.aqi) && Number.isFinite(p.coord[0]));
+    const live: HeatPoint[] = (j.data as any[]).reduce((acc: HeatPoint[], s: any) => {
+      const p: HeatPoint = { coord: [Number(s.lon), Number(s.lat)] as LngLat, aqi: Number(s.aqi) };
+      if (Number.isFinite(p.aqi) && Number.isFinite(p.coord[0])) acc.push(p);
+      return acc;
+    }, [] as HeatPoint[]);
     if (!live.length) return { points: FALLBACK_HEAT, source: 'sample' };
     const keptSeed = FALLBACK_HEAT.filter((sp) => !live.some((lp) => haversineKm(sp.coord, lp.coord) < 3));
     return { points: [...keptSeed, ...live], source: 'live' };
@@ -261,14 +263,16 @@ export async function searchPlaces(query: string): Promise<Place[]> {
     const r = await fetch(url);
     if (!r.ok) return localSearch(q);
     const j: any = await r.json();
-    const places: Place[] = (j.features ?? [])
-      .filter((f: any) => Array.isArray(f?.geometry?.coordinates))
-      .map((f: any, i: number): Place => ({
-        id: f.properties?.id ?? `geo-${i}`,
+    const places: Place[] = ((j.features ?? []) as any[]).reduce((acc: Place[], f: any) => {
+      if (!Array.isArray(f?.geometry?.coordinates)) return acc;
+      acc.push({
+        id: f.properties?.id ?? `geo-${acc.length}`,
         name: f.properties?.name ?? f.properties?.label ?? 'Unknown place',
         detail: f.properties?.label,
         coord: [Number(f.geometry.coordinates[0]), Number(f.geometry.coordinates[1])],
-      }));
+      });
+      return acc;
+    }, [] as Place[]);
     return places.length ? places : localSearch(q);
   } catch {
     return localSearch(q);
