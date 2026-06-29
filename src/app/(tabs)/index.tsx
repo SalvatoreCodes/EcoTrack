@@ -8,6 +8,7 @@ import { EcoMap } from '@/components/EcoMap';
 import { getAir } from '@/lib/api';
 import { aqiLabel, aqiLevel } from '@/lib/emissions';
 import { FALLBACK_HEAT } from '@/lib/jakarta';
+import { EMISSION_ROADS } from '@/lib/roads';
 import { currentPlace } from '@/lib/location';
 import { useStore } from '@/lib/store';
 import type { HeatPoint } from '@/lib/types';
@@ -21,6 +22,7 @@ export default function MapHome() {
   const [heat, setHeat] = useState<HeatPoint[]>(FALLBACK_HEAT);
   const [source, setSource] = useState<'live' | 'sample'>('sample');
   const [recenter, setRecenter] = useState(0);
+  const [overlay, setOverlay] = useState<'air' | 'emissions'>('air');
 
   const loadAir = () =>
     getAir()
@@ -46,7 +48,14 @@ export default function MapHome() {
   return (
     <View style={styles.fill}>
       <View style={StyleSheet.absoluteFill}>
-        <EcoMap heat={heat} userLocation={userLocation} centerOnUser recenterNonce={recenter} />
+        <EcoMap
+          heat={heat}
+          emissionRoads={EMISSION_ROADS}
+          overlay={overlay}
+          userLocation={userLocation}
+          centerOnUser
+          recenterNonce={recenter}
+        />
       </View>
 
       <View style={[styles.top, { paddingTop: insets.top + Space.sm }]} pointerEvents="box-none">
@@ -59,6 +68,14 @@ export default function MapHome() {
           <Text style={styles.aqiTxt}>
             Air now · {aqi} AQI · {aqiLabel(aqi)}
           </Text>
+        </View>
+        <View style={styles.seg}>
+          <Pressable style={[styles.segBtn, overlay === 'air' && styles.segActive]} onPress={() => setOverlay('air')}>
+            <Text style={[styles.segTxt, overlay === 'air' && styles.segTxtActive]}>Air quality</Text>
+          </Pressable>
+          <Pressable style={[styles.segBtn, overlay === 'emissions' && styles.segActive]} onPress={() => setOverlay('emissions')}>
+            <Text style={[styles.segTxt, overlay === 'emissions' && styles.segTxtActive]}>Road emissions</Text>
+          </Pressable>
         </View>
       </View>
 
@@ -84,15 +101,19 @@ export default function MapHome() {
           </Pressable>
         </View>
         <View style={styles.legend}>
-          <Text style={styles.legendTitle}>Air quality · {source === 'live' ? 'live + modeled' : 'sample data'}</Text>
+          <Text style={styles.legendTitle}>
+            {overlay === 'air'
+              ? `Air quality · ${source === 'live' ? 'live + modeled' : 'sample data'}`
+              : 'Road emissions · modeled traffic'}
+          </Text>
           <View style={styles.ramp}>
             {Heat.map((c) => (
               <View key={c} style={{ flex: 1, backgroundColor: c }} />
             ))}
           </View>
           <View style={styles.rampLabels}>
-            <Text style={styles.rampLbl}>Cleaner</Text>
-            <Text style={styles.rampLbl}>More polluted</Text>
+            <Text style={styles.rampLbl}>{overlay === 'air' ? 'Cleaner' : 'Low emissions'}</Text>
+            <Text style={styles.rampLbl}>{overlay === 'air' ? 'More polluted' : 'High emissions'}</Text>
           </View>
         </View>
       </View>
@@ -108,6 +129,11 @@ const styles = StyleSheet.create({
   pill: { ...card, flexDirection: 'row', alignItems: 'center', gap: Space.md, height: 52, paddingHorizontal: Space.lg, borderRadius: Radius.pill },
   pillTxt: { color: Color.muted, fontSize: Font.size.base, fontWeight: Font.weight.medium },
   aqiChip: { ...card, alignSelf: 'flex-end', flexDirection: 'row', alignItems: 'center', gap: Space.sm, paddingVertical: 8, paddingHorizontal: Space.md, borderRadius: Radius.pill },
+  seg: { ...card, flexDirection: 'row', padding: 4, borderRadius: Radius.pill, gap: 4 },
+  segBtn: { flex: 1, alignItems: 'center', paddingVertical: 8, borderRadius: Radius.pill },
+  segActive: { backgroundColor: Color.accent },
+  segTxt: { fontSize: Font.size.xs, fontWeight: Font.weight.semibold, color: Color.fg2 },
+  segTxtActive: { color: Color.accentOn },
   dot: { width: 10, height: 10, borderRadius: 5 },
   aqiTxt: { fontSize: Font.size.xs, fontWeight: Font.weight.semibold, color: Color.fg },
   bottom: { position: 'absolute', bottom: 0, left: 0, right: 0, paddingHorizontal: Space.lg, gap: Space.md },

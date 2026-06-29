@@ -68,6 +68,31 @@ export const MAP_HTML = /* html */ `<!DOCTYPE html>
         }
       });
     }
+    if (!map.getSource('emroads')) {
+      map.addSource('emroads', { type: 'geojson', data: fc([]) });
+      var emColor = ['match', ['get', 'level'], 1, '#2ecc71', 2, '#a3d911', 3, '#f5c518', 4, '#f5a623', '#e5484d'];
+      // soft glow underneath
+      map.addLayer({
+        id: 'emroads-glow', type: 'line', source: 'emroads',
+        layout: { 'line-cap': 'round', 'line-join': 'round', visibility: 'none' },
+        paint: {
+          'line-color': emColor,
+          'line-width': ['interpolate', ['linear'], ['zoom'], 9, ['+', 8, ['*', ['get', 'level'], 2]], 14, ['+', 18, ['*', ['get', 'level'], 5]]],
+          'line-blur': 8,
+          'line-opacity': 0.45
+        }
+      });
+      // crisp center line
+      map.addLayer({
+        id: 'emroads-line', type: 'line', source: 'emroads',
+        layout: { 'line-cap': 'round', 'line-join': 'round', visibility: 'none' },
+        paint: {
+          'line-color': emColor,
+          'line-width': ['interpolate', ['linear'], ['zoom'], 9, ['+', 2, ['get', 'level']], 14, ['+', 4, ['*', ['get', 'level'], 1.5]]],
+          'line-opacity': 0.95
+        }
+      });
+    }
     if (!map.getSource('routes')) {
       map.addSource('routes', { type: 'geojson', data: fc([]) });
       map.addLayer({
@@ -91,6 +116,20 @@ export const MAP_HTML = /* html */ `<!DOCTYPE html>
         return { type: 'Feature', properties: { aqi: p.aqi },
           geometry: { type: 'Point', coordinates: p.coord } };
       })));
+    },
+    setEmissionRoads: function (roads) {
+      ensureSources();
+      map.getSource('emroads').setData(fc((roads || []).map(function (r) {
+        return { type: 'Feature', properties: { level: r.level },
+          geometry: { type: 'LineString', coordinates: r.coords } };
+      })));
+    },
+    setOverlay: function (which) {
+      ensureSources();
+      var air = which !== 'emissions';
+      map.setLayoutProperty('heat', 'visibility', air ? 'visible' : 'none');
+      map.setLayoutProperty('emroads-glow', 'visibility', air ? 'none' : 'visible');
+      map.setLayoutProperty('emroads-line', 'visibility', air ? 'none' : 'visible');
     },
     setRoutes: function (routes, selectedId) {
       ensureSources();

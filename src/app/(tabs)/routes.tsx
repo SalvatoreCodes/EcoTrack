@@ -21,7 +21,7 @@ const MODES: { mode: Mode; icon: keyof typeof Ionicons.glyphMap; label: string }
 
 export default function RouteSearch() {
   const insets = useSafeAreaInsets();
-  const { origin, dest, mode, setOrigin, setDest, setMode, setRoutes } = useStore();
+  const { origin, dest, mode, recents, setOrigin, setDest, setMode, setRoutes, addRecent } = useStore();
   const [busy, setBusy] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Place[]>([]);
@@ -57,6 +57,7 @@ export default function RouteSearch() {
   const choose = async (place: Place) => {
     const from = origin ?? SAMPLE_PLACES[0];
     setDest(place);
+    addRecent(place);
     setBusy(true);
     try {
       const routes = await getRoutes(from, place, mode);
@@ -70,7 +71,7 @@ export default function RouteSearch() {
   };
 
   const showResults = query.trim().length > 0;
-  const list = showResults ? results : SAMPLE_PLACES;
+  const list = showResults ? results : recents;
 
   return (
     <View style={[styles.fill, { paddingTop: insets.top }]}>
@@ -144,6 +145,9 @@ export default function RouteSearch() {
         ))}
         {showResults && !searching && results.length === 0 ? (
           <Text style={styles.empty}>No places found. Try a different name, or pick on the map.</Text>
+        ) : null}
+        {!showResults && recents.length === 0 ? (
+          <Text style={styles.empty}>No recent trips yet. Search a destination or pick one on the map — they’ll show up here.</Text>
         ) : null}
       </ScrollView>
 

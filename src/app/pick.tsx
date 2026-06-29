@@ -13,7 +13,7 @@ import { Color, Elevation, Font, Radius, Space } from '@/theme';
 
 export default function PickOnMap() {
   const insets = useSafeAreaInsets();
-  const { origin, mode, userLocation, setDest, setRoutes } = useStore();
+  const { origin, mode, userLocation, setDest, setRoutes, addRecent } = useStore();
   const [pin, setPin] = useState<[number, number] | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -24,8 +24,9 @@ export default function PickOnMap() {
     setBusy(true);
     try {
       const name = await reverseGeocode(pin);
-      const dest: Place = { id: 'picked', name, detail: 'Picked on map', coord: pin };
+      const dest: Place = { id: `pick-${pin[0].toFixed(4)},${pin[1].toFixed(4)}`, name, detail: 'Picked on map', coord: pin };
       setDest(dest);
+      addRecent(dest);
       const from = origin ?? SAMPLE_PLACES[0];
       const routes = await getRoutes(from, dest, mode);
       setRoutes(routes);

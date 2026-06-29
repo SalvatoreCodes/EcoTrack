@@ -10,7 +10,7 @@ function toLine(r: RouteOption) {
 }
 
 export function EcoMap(props: EcoMapProps) {
-  const { heat, routes, selectedId, origin, dest, fitToRoutes, userLocation, centerOnUser, follow, bearing, recenterNonce, onReady, onMapClick } = props;
+  const { heat, emissionRoads, overlay, routes, selectedId, origin, dest, fitToRoutes, userLocation, centerOnUser, follow, bearing, recenterNonce, onReady, onMapClick } = props;
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [ready, setReady] = useState(false);
   const didCenter = useRef(false);
@@ -36,6 +36,8 @@ export function EcoMap(props: EcoMapProps) {
   }, [onReady, onMapClick]);
 
   useEffect(() => { if (ready) call('setHeat', heat); }, [ready, heat]);
+  useEffect(() => { if (ready && emissionRoads) call('setEmissionRoads', emissionRoads); }, [ready, emissionRoads]);
+  useEffect(() => { if (ready) call('setOverlay', overlay ?? 'air'); }, [ready, overlay]);
   useEffect(() => {
     if (ready) call('setRoutes', (routes ?? []).map(toLine), selectedId ?? null);
   }, [ready, routes, selectedId]);
