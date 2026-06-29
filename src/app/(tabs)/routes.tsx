@@ -21,7 +21,7 @@ const MODES: { mode: Mode; icon: keyof typeof Ionicons.glyphMap; label: string }
 
 export default function RouteSearch() {
   const insets = useSafeAreaInsets();
-  const { origin, dest, mode, recents, setOrigin, setDest, setMode, setRoutes, addRecent } = useStore();
+  const { origin, dest, mode, recents, setOrigin, setUserLocation, setDest, setMode, setRoutes, addRecent } = useStore();
   const [busy, setBusy] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Place[]>([]);
@@ -55,11 +55,17 @@ export default function RouteSearch() {
   }, [query]);
 
   const choose = async (place: Place) => {
-    const from = origin ?? SAMPLE_PLACES[0];
     setDest(place);
     addRecent(place);
     setBusy(true);
     try {
+      // Always route from a fresh GPS fix; fall back only if location is unavailable.
+      const here = await currentPlace();
+      if (here) {
+        setOrigin(here);
+        setUserLocation(here.coord);
+      }
+      const from = here ?? origin ?? SAMPLE_PLACES[0];
       const routes = await getRoutes(from, place, mode);
       setRoutes(routes);
       router.push('/compare');

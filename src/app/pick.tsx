@@ -7,13 +7,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EcoMap } from '@/components/EcoMap';
 import { getRoutes, reverseGeocode } from '@/lib/api';
 import { SAMPLE_PLACES } from '@/lib/jakarta';
+import { currentPlace } from '@/lib/location';
 import { useStore } from '@/lib/store';
 import type { Place } from '@/lib/types';
 import { Color, Elevation, Font, Radius, Space } from '@/theme';
 
 export default function PickOnMap() {
   const insets = useSafeAreaInsets();
-  const { origin, mode, userLocation, setDest, setRoutes, addRecent } = useStore();
+  const { origin, mode, userLocation, setOrigin, setUserLocation, setDest, setRoutes, addRecent } = useStore();
   const [pin, setPin] = useState<[number, number] | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -27,7 +28,13 @@ export default function PickOnMap() {
       const dest: Place = { id: `pick-${pin[0].toFixed(4)},${pin[1].toFixed(4)}`, name, detail: 'Picked on map', coord: pin };
       setDest(dest);
       addRecent(dest);
-      const from = origin ?? SAMPLE_PLACES[0];
+      // Always route from a fresh GPS fix; fall back only if location is unavailable.
+      const here = await currentPlace();
+      if (here) {
+        setOrigin(here);
+        setUserLocation(here.coord);
+      }
+      const from = here ?? origin ?? SAMPLE_PLACES[0];
       const routes = await getRoutes(from, dest, mode);
       setRoutes(routes);
       router.replace('/compare');
