@@ -79,11 +79,12 @@ async function trafficMult(point: LngLat, key: string): Promise<number> {
  */
 async function assemble(drivingLegs: Leg[], bikeLeg: Leg | null, mode: Mode, tomtomKey: string): Promise<RouteOption[]> {
   const slow = mode === 'bike' || mode === 'walk';
-  const cands: { leg: Leg; mult: number; kg: number }[] = [];
-  for (const leg of drivingLegs || []) {
-    const mult = slow ? 1 : await trafficMult(midpoint(leg.geometry), tomtomKey);
-    cands.push({ leg, mult, kg: (leg.distanceKm * EMISSION_FACTORS[mode] * mult) / 1000 });
-  }
+  const cands = await Promise.all(
+    (drivingLegs || []).map(async (leg) => {
+      const mult = slow ? 1 : await trafficMult(midpoint(leg.geometry), tomtomKey);
+      return { leg, mult, kg: (leg.distanceKm * EMISSION_FACTORS[mode] * mult) / 1000 };
+    }),
+  );
   cands.sort((a, b) => a.leg.durationMin - b.leg.durationMin);
   const opts: RouteOption[] = [];
   const fastest = cands[0];

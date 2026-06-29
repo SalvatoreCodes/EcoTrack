@@ -33,7 +33,7 @@ export default function Settings() {
       <View style={styles.header}>
         <Text style={styles.title}>Settings</Text>
       </View>
-      <ScrollView contentContainerStyle={{ paddingHorizontal: Space.lg, paddingBottom: Space.huge }}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={styles.group}>APP</Text>
         <View style={styles.card}>
           <View style={[styles.row, styles.divider]}>
@@ -88,6 +88,7 @@ export default function Settings() {
 
 const styles = StyleSheet.create({
   fill: { flex: 1, backgroundColor: Color.bg },
+  scrollContent: { paddingHorizontal: Space.lg, paddingBottom: Space.huge },
   header: { paddingHorizontal: Space.lg, paddingVertical: Space.md },
   title: { fontSize: Font.size.xl, fontWeight: Font.weight.semibold, color: Color.fg },
   group: { fontSize: Font.size.xs, fontWeight: Font.weight.semibold, color: Color.muted, marginTop: Space.xl, marginBottom: Space.sm, paddingLeft: 2 },

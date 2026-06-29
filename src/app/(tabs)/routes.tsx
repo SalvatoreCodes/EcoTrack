@@ -130,7 +130,7 @@ export default function RouteSearch() {
         <Text style={styles.section}>{showResults ? 'RESULTS' : 'RECENT'}</Text>
         {searching ? <ActivityIndicator size="small" color={Color.muted} /> : null}
       </View>
-      <ScrollView contentContainerStyle={{ paddingBottom: Space.huge }} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles.listContent} keyboardShouldPersistTaps="handled">
         {list.map((p) => (
           <Pressable key={p.id} style={styles.place} onPress={() => choose(p)} disabled={busy}>
             <View style={styles.pic}>
@@ -159,6 +159,7 @@ export default function RouteSearch() {
 
 const styles = StyleSheet.create({
   fill: { flex: 1, backgroundColor: Color.bg },
+  listContent: { paddingBottom: Space.huge },
   header: { paddingHorizontal: Space.lg, paddingVertical: Space.md },
   title: { fontSize: Font.size.xl, fontWeight: Font.weight.semibold, color: Color.fg },
   ab: { paddingHorizontal: Space.lg },

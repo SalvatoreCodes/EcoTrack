@@ -61,6 +61,7 @@ export function EcoMap(props: EcoMapProps) {
       ref={iframeRef}
       src={blobUrl}
       title="EcoTrack map"
+      sandbox="allow-scripts"
       style={{ border: 'none', width: '100%', height: '100%', background: Color.surfaceMap }}
     />
   );

@@ -10,9 +10,13 @@ import { useStore } from '@/lib/store';
 import { Color, Elevation, Font, Radius, Space } from '@/theme';
 
 interface Msg {
+  id: string;
   role: 'ai' | 'me';
   text: string;
 }
+
+let msgSeq = 0;
+const mkMsg = (role: Msg['role'], text: string): Msg => ({ id: `m${msgSeq++}`, role, text });
 
 const CHIPS = ['Compare all modes', 'Is biking realistic?', 'What about TransJakarta?'];
 
@@ -25,7 +29,7 @@ export default function Assistant() {
   const scrollRef = useRef<ScrollView>(null);
 
   useEffect(() => {
-    setMessages([{ role: 'ai', text: introMessage(routes, selectedRouteId, dest?.name) }]);
+    setMessages([mkMsg('ai', introMessage(routes, selectedRouteId, dest?.name))]);
   }, [routes, selectedRouteId, dest]);
 
   const scroll = () => setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 50);
@@ -34,14 +38,14 @@ export default function Assistant() {
     const t = text.trim();
     if (!t || typing) return;
     setInput('');
-    const next: Msg[] = [...messages, { role: 'me', text: t }];
+    const next: Msg[] = [...messages, mkMsg('me', t)];
     setMessages(next);
     setTyping(true);
     scroll();
     chat(next, { routes, selectedId: selectedRouteId, destName: dest?.name })
-      .then((r) => setMessages([...next, { role: 'ai', text: r.reply }]))
+      .then((r) => setMessages([...next, mkMsg('ai', r.reply)]))
       .catch(() =>
-        setMessages([...next, { role: 'ai', text: 'Sorry, I couldn’t answer that one — try rephrasing.' }]),
+        setMessages([...next, mkMsg('ai', 'Sorry, I couldn’t answer that one — try rephrasing.')]),
       )
       .finally(() => {
         setTyping(false);
@@ -59,8 +63,8 @@ export default function Assistant() {
       </View>
 
       <ScrollView ref={scrollRef} style={styles.chat} contentContainerStyle={styles.chatContent}>
-        {messages.map((m, i) => (
-          <View key={i} style={[styles.bubble, m.role === 'ai' ? styles.ai : styles.me]}>
+        {messages.map((m) => (
+          <View key={m.id} style={[styles.bubble, m.role === 'ai' ? styles.ai : styles.me]}>
             <Text style={m.role === 'ai' ? styles.aiTxt : styles.meTxt}>{m.text}</Text>
           </View>
         ))}
