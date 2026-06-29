@@ -36,9 +36,9 @@ export default function Navigate() {
   const steps: Step[] = route?.steps ?? [];
 
   const [idx, setIdx] = useState(0); // index along geometry
-  const [pos, setPos] = useState<[number, number] | null>(geometry[0] ?? null);
+  const [pos, setPos] = useState<[number, number] | null>(origin?.coord ?? geometry[0] ?? null);
   const [heading, setHeading] = useState(0);
-  const [simulate, setSimulate] = useState(true);
+  const [simulate, setSimulate] = useState(false); // live GPS by default; toggle on for stationary testing
   const subRef = useRef<{ remove: () => void } | null>(null);
 
   // Simulate drive: advance along the real road geometry for stationary testing.
