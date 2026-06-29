@@ -10,7 +10,6 @@ import { MAP_HTML } from './mapHtml';
 export interface EcoMapProps {
   heat: HeatPoint[];
   emissionRoads?: EmissionRoad[];
-  overlay?: 'air' | 'emissions'; // which heat overlay is visible (default 'air')
   routes?: RouteOption[];
   selectedId?: string | null;
   origin?: Place | null;
@@ -39,7 +38,7 @@ function safeJson(value: unknown): string {
 }
 
 export function EcoMap(props: EcoMapProps) {
-  const { heat, emissionRoads, overlay, routes, selectedId, origin, dest, fitToRoutes, userLocation, centerOnUser, follow, bearing, recenterNonce, onReady, onMapClick } = props;
+  const { heat, emissionRoads, routes, selectedId, origin, dest, fitToRoutes, userLocation, centerOnUser, follow, bearing, recenterNonce, onReady, onMapClick } = props;
   const ref = useRef<WebView>(null);
   const [ready, setReady] = useState(false);
   const didCenter = useRef(false);
@@ -51,7 +50,6 @@ export function EcoMap(props: EcoMapProps) {
 
   useEffect(() => { if (ready) call('setHeat', heat); }, [ready, heat]);
   useEffect(() => { if (ready && emissionRoads) call('setEmissionRoads', emissionRoads); }, [ready, emissionRoads]);
-  useEffect(() => { if (ready) call('setOverlay', overlay ?? 'air'); }, [ready, overlay]);
   useEffect(() => {
     if (ready) call('setRoutes', (routes ?? []).map(toLine), selectedId ?? null);
   }, [ready, routes, selectedId]);
